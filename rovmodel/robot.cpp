@@ -1,4 +1,4 @@
-﻿#include <iostream>
+#include <iostream>
 
 const float GRAVITY_CONST = 9.81;
 const float TIME_CONST = 0.1;
@@ -50,9 +50,9 @@ public:
             this->depth = 0;
     }
 
-    float getDepth() 
-    { 
-        return depth; 
+    float getDepth()
+    {
+        return depth;
     }
 
     void setEnginePower(float power)
