@@ -1,35 +1,33 @@
 #include <iostream>
+#include <iomanip>
 
 const float GRAVITY_CONST = 9.81;
 const float TIME_CONST = 0.1;
-const float ITERATIONS = 20;
+const float ITERATIONS = 200;
 
-class Robot
+class FloatingObject
 {
-    float depth;
-    float waterResistanceK;
-    float speed;
     float mass;
+    float waterResistanceK;
     float archimedForce;
-    float enginePower;
+    float speed;
+    float depth;
 
 public:
-
-    Robot(float mass, float archimedForce, float waterResistanceK)
-        : speed(0),
-        depth(0),
-        enginePower(0)
-    {
+    FloatingObject(float mass, float archimedForce, float waterResistanceK) :
+        mass(mass),
+        archimedForce(archimedForce),
+        waterResistanceK(waterResistanceK)
+    {/*
         this->mass = mass;
         this->archimedForce = archimedForce;
-        this->waterResistanceK = waterResistanceK;
+        this->waterResistanceK = waterResistanceK;*/
     }
 
-    void Initialize(float speed, float depth, float power)
+    void Initialize(float speed, float depth)
     {
         setSpeed(speed);
         setDepth(depth);
-        setEnginePower(power);
     }
 
     void setSpeed(float speed)
@@ -55,9 +53,9 @@ public:
         return depth;
     }
 
-    void setEnginePower(float power)
+    float getArchimedForce()
     {
-        this->enginePower = power;
+        return archimedForce;
     }
 
     float getMass()
@@ -70,9 +68,22 @@ public:
         return waterResistanceK;
     }
 
-    float getArchimedForce()
+};
+
+class Robot : public FloatingObject
+{
+    float enginePower;
+
+public:
+    Robot(float mass, float archimedForce, float waterResistanceK, float enginePower)
+       : FloatingObject(mass, archimedForce, waterResistanceK),
+         enginePower(enginePower)
     {
-        return archimedForce;
+    }
+
+    void setEnginePower(float power)
+    {
+        this->enginePower = power;
     }
 
     float getEnginePower()
@@ -88,20 +99,37 @@ float CalculateForces(Robot & r)
     return weight + r.getArchimedForce() + waterResistance + r.getEnginePower();
 }
 
+float CalculateForces(FloatingObject & w)
+{
+    float weight = -w.getMass()*GRAVITY_CONST;
+    float waterResistance = -w.getSpeed()*w.getWaterResistanceK();
+    return weight + w.getArchimedForce() + waterResistance;
+}
+
 int main()
 {
-    Robot r(1, 50, 0.1);
-    r.Initialize(0, -5, 0);
-    //r.setEnginePower(-40);
+    Robot r(1, 50, 0.1, -35);
+    FloatingObject w(1, 30, 0.1);
+    r.Initialize(0, -5);
+    w.Initialize(0, -5);
 
     for (int i =0; i < ITERATIONS; i++)
     {
         float forceSum = CalculateForces(r);
         float acceleration = forceSum/r.getMass();
+
         r.setSpeed(acceleration*TIME_CONST);
         r.setDepth(r.getDepth() + r.getSpeed()*TIME_CONST);
-        std::cout << r.getDepth() << std::endl;
+
+        forceSum = CalculateForces(w);
+        acceleration = forceSum/w.getMass();
+
+        w.setSpeed(acceleration*TIME_CONST);
+        w.setDepth(w.getDepth() + w.getSpeed()*TIME_CONST);
+
+        std::cout << std::setw(15) << r.getDepth() << std::setw(15) << w.getDepth() << std::endl;
     }
     system("pause");
     return 0;
 }
+
